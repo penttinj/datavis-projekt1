@@ -27,5 +27,3 @@ School project, probably won't be updated but constructive criticism is welcome.
 
 [![] (https://github.com/penttinj.png?size=50)](https://github.com/penttinj)
 [![] (https://github.com/Azraul.png?size=50)](https://github.com/Azraul)
-
-[![](https://github.com/remarkablemark.png?size=50)](https://github.com/remarkablemark)
