@@ -25,5 +25,5 @@ School project, probably won't be updated but constructive criticism is welcome.
 
 ## Contributors
 
-[![] (https://github.com/penttinj.png?size=50)](https://github.com/penttinj)
-[![] (https://github.com/Azraul.png?size=50)](https://github.com/Azraul)
+[![Image of Johan](https://github.com/penttinj.png?size=50)](https://github.com/penttinj)
+[![Image of Kristoffer](https://github.com/Azraul.png?size=50)](https://github.com/Azraul)
