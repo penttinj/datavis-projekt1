@@ -2,8 +2,7 @@
 
 ###### PROJECT 1 - Visualisering av information, Arcada 2020 
 
-## Assignment - Swedish
-DEL 1 - VISUALISERING AV BILDDATA (Max poäng 40p || Vitsord +2)
+## DEL 1 - VISUALISERING AV BILDDATA (Max poäng 40p || Vitsord +2)
 Gör en webbsida som tillåter en användare att 1.ladda upp eller 2.ange en länk till en bild.
 Bildens ljus-/färgfördelning ska visualiseras i form av ett histogram.
 Bekanta dej med histogram här: https://moderskeppet.se/resurs/histogram/ för att få en
@@ -23,3 +22,8 @@ men ifall ni kommer på nåt bättre är det nog fritt fram
 
 ## Contribution
 School project, probably won't be updated but constructive criticism is welcome.
+
+## Contributors
+
+[![] (https://avatars3.githubusercontent.com/u/30961391?s=460&u=e339356a8d27a0c46474d541476a6028769c8e1e&v=4)]https://github.com/penttinj
+[![] (https://avatars2.githubusercontent.com/u/60212358?s=460&u=29b5c504c213446d1915bba9d31958b6b1db18ca&v=4)]https://github.com/Azraul
