@@ -25,5 +25,7 @@ School project, probably won't be updated but constructive criticism is welcome.
 
 ## Contributors
 
-[![] (https://avatars3.githubusercontent.com/u/30961391?s=460&u=e339356a8d27a0c46474d541476a6028769c8e1e&v=4)](https://github.com/penttinj)
-[![] (https://avatars2.githubusercontent.com/u/60212358?s=460&u=29b5c504c213446d1915bba9d31958b6b1db18ca&v=4)](https://github.com/Azraul)
+[![] (https://github.com/penttinj.png?size=50)](https://github.com/penttinj)
+[![] (https://github.com/Azraul.png?size=50)](https://github.com/Azraul)
+
+[![](https://github.com/remarkablemark.png?size=50)](https://github.com/remarkablemark)
