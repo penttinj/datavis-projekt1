@@ -17,7 +17,7 @@ använder mig av HTML5 canvas och funktionen getImageData() för att läsa datan
 men ifall ni kommer på nåt bättre är det nog fritt fram
 
 ## Preview
-![image of sourmango](teacher.jpg)
+[![Image of thesourmango](https://github.com/thesourmango.png?size=200)](https://github.com/thesourmango)
 
 
 ## Contribution
