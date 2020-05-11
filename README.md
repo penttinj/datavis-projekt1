@@ -16,6 +16,12 @@ Jag visar en nästan fungerande demo över hur man läser in pixelvärdet från 
 använder mig av HTML5 canvas och funktionen getImageData() för att läsa datan från filen,
 men ifall ni kommer på nåt bättre är det nog fritt fram
 
+## Getting started
+Requires Node version 11.
+1. Clone project
+2. Install dependencies `npm install`
+3. Run dev server `npm run gulp`
+
 ## Preview
 [![Image of thesourmango](https://github.com/thesourmango.png?size=200)](https://github.com/thesourmango)
 
