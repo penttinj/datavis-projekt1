@@ -4,8 +4,9 @@ let colorCounts = {
   green: [],
   blue: []
 }
+let hasBeenDrawn = false;
 
-const processData = async (dataArray) => {
+const processData = (dataArray) => {
   console.log("dataarray", dataArray.length);
   const temporaryCounts = {
     r: {},
@@ -54,8 +55,8 @@ const processData = async (dataArray) => {
 
 
 const drawChart = () => {
-  const width = 900;
-  const height = 400;
+  const width = window.innerWidth / 2;
+  const height = window.innerHeight / 2;
 
   const yScale = d3.scaleLinear()
     .domain([0,
@@ -67,12 +68,23 @@ const drawChart = () => {
     ])
     .range([height, 0]);
 
+  const xScale = d3.scaleLinear()
+    .domain([0, 255])
+    .range([0, width]);
+
+    console.log("d3max:");
+    console.log(d3.max([
+      d3.max(colorCounts.red.map((v) => { return v.count })),
+      d3.max(colorCounts.green.map((v) => { return v.count })),
+      d3.max(colorCounts.blue.map((v) => { return v.count }))
+    ]));
+
   d3.select("svg").remove();
   const canvas = d3.select("#lines").append("svg").attr("width", width).attr("height", height);
 
   // d3.line() är en egenerator som genererar en sträng för d="M x y ..."
   const path = d3.line()
-    .x((data, i) => { return data.intensity * 3 })
+    .x((data, i) => { return xScale(data.intensity) })
     .y((data, i) => yScale(data.count))
   //.curve(d3.curveCardinal);
 
@@ -90,7 +102,9 @@ const drawChart = () => {
     .attr("stroke", "blue")
     .attr("d", path(colorCounts.blue));
 
-  //console.log("NYCKLAR", Object.keys(colors.r));
+  
+  // Bilden har garanterat blivit ritad då man ändrar boolean i slutet av funktionen
+  hasBeenDrawn = true;
 }
 
 const getImageData = (img) => {
@@ -133,3 +147,7 @@ const handleImage = (input) => {
 
 
 document.querySelector("#input").addEventListener("change", handleImage);
+window.addEventListener("resize", (e) => {
+  if (hasBeenDrawn) drawChart();
+  else console.log("false");
+})
