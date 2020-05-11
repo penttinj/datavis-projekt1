@@ -1,60 +1,68 @@
-const drawChart = async (datan) => {
-  const dataArray = datan;
+// "Global state" av våran data.
+let colorCounts = {
+  red: [],
+  green: [],
+  blue: []
+}
+
+const processData = async (dataArray) => {
   console.log("dataarray", dataArray.length);
-  const colorCounts = {
+  const temporaryCounts = {
     r: {},
     g: {},
     b: {},
   }
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
-    //colors.r.push(dataArray[i]);
-    let colorVal = colorCounts.r[dataArray[i]];
-    colorCounts.r[dataArray[i]] = colorVal ? colorVal + 1 : 1;
+    let colorVal = temporaryCounts.r[dataArray[i]]; // colorVal blir antingen mängden occurences, eller undefined
+    temporaryCounts.r[dataArray[i]] = colorVal ? colorVal + 1 : 1;
 
-    colorVal = colorCounts.g[dataArray[i + 1]];
-    colorCounts.g[dataArray[i + 1]] = colorVal ? colorVal + 1 : 1;
+    colorVal = temporaryCounts.g[dataArray[i + 1]];
+    temporaryCounts.g[dataArray[i + 1]] = colorVal ? colorVal + 1 : 1;
 
-    colorVal = colorCounts.b[dataArray[i + 2]];
-    colorCounts.b[dataArray[i + 2]] = colorVal ? colorVal + 1 : 1;
+    colorVal = temporaryCounts.b[dataArray[i + 2]];
+    temporaryCounts.b[dataArray[i + 2]] = colorVal ? colorVal + 1 : 1;
   }
 
-  console.log("colorCounts", colorCounts);
 
   /*
-  * Konverterar objectet till en array av object
+  * Konverterar counts till en array av object
   */
-  let colorCountsObj = {
+  // Töm colorCounts från sin state först
+  colorCounts = {
     red: [],
     green: [],
     blue: []
   }
-  for (const key in colorCounts.r) {
-    colorCountsObj.red.push(
-      { "intensity": key, "count": colorCounts.r[key] }
+  for (const key in temporaryCounts.r) {
+    colorCounts.red.push(
+      { "intensity": key, "count": temporaryCounts.r[key] }
     )
   }
-  for (const key in colorCounts.g) {
-    colorCountsObj.green.push(
-      { "intensity": key, "count": colorCounts.g[key] }
+  for (const key in temporaryCounts.g) {
+    colorCounts.green.push(
+      { "intensity": key, "count": temporaryCounts.g[key] }
     )
   }
-  for (const key in colorCounts.b) {
-    colorCountsObj.blue.push(
-      { "intensity": key, "count": colorCounts.b[key] }
+  for (const key in temporaryCounts.b) {
+    colorCounts.blue.push(
+      { "intensity": key, "count": temporaryCounts.b[key] }
     )
   }
+  console.log("colorcounts: ", colorCounts);
+}
 
 
-
+const drawChart = () => {
   const width = 900;
   const height = 400;
+
   const yScale = d3.scaleLinear()
     .domain([0,
       d3.max([
-        d3.max(colorCountsObj.red.map((v) => { return v.count })),
-        d3.max(colorCountsObj.green.map((v) => { return v.count })),
-        d3.max(colorCountsObj.blue.map((v) => { return v.count }))
+        d3.max(colorCounts.red.map((v) => { return v.count })),
+        d3.max(colorCounts.green.map((v) => { return v.count })),
+        d3.max(colorCounts.blue.map((v) => { return v.count }))
       ])
     ])
     .range([height, 0]);
@@ -72,25 +80,17 @@ const drawChart = async (datan) => {
   canvas.append("path")
     .attr("fill", "none")
     .attr("stroke", "red")
-    .attr("d", path(colorCountsObj.red));
+    .attr("d", path(colorCounts.red));
   canvas.append("path")
     .attr("fill", "none")
     .attr("stroke", "green")
-    .attr("d", path(colorCountsObj.green));
+    .attr("d", path(colorCounts.green));
   canvas.append("path")
     .attr("fill", "none")
     .attr("stroke", "blue")
-    .attr("d", path(colorCountsObj.blue));
+    .attr("d", path(colorCounts.blue));
 
   //console.log("NYCKLAR", Object.keys(colors.r));
-}
-
-
-// Read external JSON data with promise-structure
-async function readJson() {
-  return d3.json("/data/img.json").then((data) => {
-    return data;
-  })
 }
 
 const getImageData = (img) => {
@@ -103,8 +103,8 @@ const getImageData = (img) => {
   context.drawImage(img, 0, 0);
   const imageData = context.getImageData(0, 0, img.width, img.height);
 
-  // Push image data to an array and send it to drawchart;
-  let dataArray = [];
+  // Push image data to an array
+  const dataArray = [];
   imageData.data.forEach(element => {
     dataArray.push(element);
   });
@@ -122,7 +122,8 @@ const handleImage = (input) => {
       // Waits until the img element has completely loaded so we can access its properties
       img.onload = () => {
         data = getImageData(img);
-        drawChart(data);
+        processData(data);
+        drawChart();
       }
     }
 
