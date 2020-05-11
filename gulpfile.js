@@ -1,10 +1,8 @@
 const gulp = require('gulp'),
   webserver = require('gulp-webserver'),
-  gutil = require('gulp-util'),
-  sourcemaps = require('gulp-sourcemaps'),
-
   dest = 'src/';
 
+  
 gulp.task('html', function () {
   gulp.src(dest + '*.html');
 });
@@ -16,6 +14,7 @@ gulp.task('css', function () {
 gulp.task('js', function () {
   gulp.dest(dest + 'js');
 });
+
 
 gulp.task('watch', function () {
   gulp.watch(dest + '**/*.css', ['css']);
@@ -32,4 +31,4 @@ gulp.task('webserver', function () {
     }));
 });
 
-gulp.task('default', ['html', 'webserver', 'watch']);
+gulp.task('default', ['html', 'webserver']);

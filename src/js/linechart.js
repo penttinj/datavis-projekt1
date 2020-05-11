@@ -12,11 +12,11 @@ const drawChart = async (datan) => {
     let colorVal = colorCounts.r[dataArray[i]];
     colorCounts.r[dataArray[i]] = colorVal ? colorVal + 1 : 1;
 
-    colorVal = colorCounts.g[dataArray[i+1]];
-    colorCounts.g[dataArray[i+1]] = colorVal ? colorVal + 1 : 1;
+    colorVal = colorCounts.g[dataArray[i + 1]];
+    colorCounts.g[dataArray[i + 1]] = colorVal ? colorVal + 1 : 1;
 
-    colorVal = colorCounts.b[dataArray[i+2]];
-    colorCounts.b[dataArray[i+2]] = colorVal ? colorVal + 1 : 1;
+    colorVal = colorCounts.b[dataArray[i + 2]];
+    colorCounts.b[dataArray[i + 2]] = colorVal ? colorVal + 1 : 1;
   }
 
   console.log("colorCounts", colorCounts);
@@ -50,17 +50,13 @@ const drawChart = async (datan) => {
   const width = 900;
   const height = 400;
   const yScale = d3.scaleLinear()
-    .domain([0, d3.max(
-      //blues.map(function(val) { return val.value; })),
-      [
+    .domain([0,
+      d3.max([
         d3.max(colorCountsObj.red.map((v) => { return v.count })),
         d3.max(colorCountsObj.green.map((v) => { return v.count })),
         d3.max(colorCountsObj.blue.map((v) => { return v.count }))
-      ]
-    )
+      ])
     ])
-
-
     .range([height, 0]);
 
   d3.select("svg").remove();
@@ -97,37 +93,37 @@ async function readJson() {
   })
 }
 
-const analyze = (img) => {
-  //const img = document.querySelector("#bilden");
-
+const getImageData = (img) => {
   console.log("Image has loaded");
 
   const canvas = document.querySelector("#canvas");
   const context = canvas.getContext("2d");
-  console.log("before:", img.height, img.width);
   canvas.height = img.height;
   canvas.width = img.width;
-  //console.log("after:", canvas.height, canvas.width);
   context.drawImage(img, 0, 0);
   const imageData = context.getImageData(0, 0, img.width, img.height);
-  //console.log("imageData");
-  let arr = [];
-  imageData.data.forEach(element => {
-    arr.push(element);
-  });
-  drawChart(arr);
 
+  // Push image data to an array and send it to drawchart;
+  let dataArray = [];
+  imageData.data.forEach(element => {
+    dataArray.push(element);
+  });
+
+  return dataArray;
 }
 
-const readImage = (input) => {
+const handleImage = (input) => {
   if (input.target.files && input.target.files[0]) {
     let img = new Image();
+    let data = [];
     const reader = new FileReader();
     reader.onload = (e) => {
-      //const imgElement = document.querySelector("#bilden");
-      //imgElement.src = e.target.result;
       img.src = e.target.result;
-      img.onload = () => analyze(img); // Waits until the img element has completely loaded so we can access its properties
+      // Waits until the img element has completely loaded so we can access its properties
+      img.onload = () => {
+        data = getImageData(img);
+        drawChart(data);
+      }
     }
 
     reader.readAsDataURL(input.target.files[0]);
@@ -135,15 +131,4 @@ const readImage = (input) => {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-document.querySelector("#input").addEventListener("change", readImage);
-//window.onload = drawChart();
+document.querySelector("#input").addEventListener("change", handleImage);
