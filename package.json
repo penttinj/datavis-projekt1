@@ -1,0 +1,27 @@
+{
+  "name": "datavis-projekt1",
+  "version": "1.0.0",
+  "description": "Visualisering av bilddata med D3.js",
+  "scripts": {
+    "gulp": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/penttinj/datavis-projekt1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/penttinj/datavis-projekt1/issues"
+  },
+  "homepage": "https://github.com/penttinj/datavis-projekt1#readme",
+  "devDependencies": {
+    "d3": "^5.16.0",
+    "gulp": "^3.9.1",
+    "gulp-cli": "^2.2.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-util": "^3.0.8",
+    "gulp-webserver": "^0.9.1"
+  },
+  "dependencies": {}
+}

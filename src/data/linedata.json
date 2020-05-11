@@ -1,0 +1,50 @@
+[
+  {
+    "month": "January",
+    "temp": -6.6
+  },
+  {
+    "month": "February",
+    "temp": -7.2
+  },
+  {
+    "month": "March",
+    "temp": -2.1
+  },
+  {
+    "month": "April",
+    "temp": 4.5
+  },
+  {
+    "month": "May",
+    "temp": 12.2
+  },
+  {
+    "month": "June",
+    "temp": 18.5
+  },
+  {
+    "month": "July",
+    "temp": 19.8
+  },
+  {
+    "month": "August",
+    "temp": 17.3
+  },
+  {
+    "month": "September",
+    "temp": 12.4
+  },
+  {
+    "month": "October",
+    "temp": 7.9
+  },
+  {
+    "month": "November",
+    "temp": 3.7
+  },
+  {
+    "month": "December",
+    "temp": 1.2
+  }
+]
