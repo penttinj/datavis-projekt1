@@ -57,6 +57,7 @@ const processData = (dataArray) => {
 const drawChart = () => {
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
+  const margin = {left:120, right:120, top:80, bottom:40}
 
   const yScale = d3.scaleLinear()
     .domain([0,
@@ -72,6 +73,15 @@ const drawChart = () => {
     .domain([0, 255])
     .range([0, width]);
 
+  let yAxis = d3.axisLeft(yScale)
+                .ticks(5)
+                .tickPadding(15)
+                .tickSize(10);
+  let xAxis = d3.axisBottom(xScale)
+                .ticks(8)
+                .tickPadding(15)
+                .tickSize(10);
+
     console.log("d3max:");
     console.log(d3.max([
       d3.max(colorCounts.red.map((v) => { return v.count })),
@@ -80,7 +90,9 @@ const drawChart = () => {
     ]));
 
   d3.select("svg").remove();
-  const canvas = d3.select("#lines").append("svg").attr("width", width).attr("height", height);
+
+  // Gör ritområdet med margins
+  const canvas = d3.select("#lines").append("svg").attr("width", width+margin.left+margin.right).attr("height", height+margin.top+margin.bottom);
 
   // d3.line() är en egenerator som genererar en sträng för d="M x y ..."
   const path = d3.line()
@@ -88,19 +100,30 @@ const drawChart = () => {
     .y((data, i) => yScale(data.count))
   //.curve(d3.curveCardinal);
 
+  // Gör en grupp som vi kan flytta runt på
+  let histogramGroup = canvas.append("g").attr("transform","translate("+margin.left+","+margin.top+")")
   // rita en linje
-  canvas.append("path")
+  histogramGroup.append("path")
     .attr("fill", "none")
     .attr("stroke", "red")
     .attr("d", path(colorCounts.red));
-  canvas.append("path")
+  histogramGroup.append("path")
     .attr("fill", "none")
     .attr("stroke", "green")
     .attr("d", path(colorCounts.green));
-  canvas.append("path")
+  histogramGroup.append("path")
     .attr("fill", "none")
     .attr("stroke", "blue")
     .attr("d", path(colorCounts.blue));
+
+  // rita axises
+  histogramGroup.append("g")
+        .attr("class","axis y")
+        .call(yAxis);
+  histogramGroup.append("g")
+                .attr("class","axis x")
+                .attr("transform","translate(0,"+height+")")
+                .call(xAxis);
 
   
   // Bilden har garanterat blivit ritad då man ändrar boolean i slutet av funktionen
