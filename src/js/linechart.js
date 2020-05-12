@@ -78,7 +78,8 @@ const drawChart = () => {
                 .tickPadding(15)
                 .tickSize(10);
   let xAxis = d3.axisBottom(xScale)
-                .ticks(8)
+                .ticks(6)
+                .tickValues([0,50,100,150,200,255])
                 .tickPadding(15)
                 .tickSize(10);
 
@@ -91,6 +92,7 @@ const drawChart = () => {
 
   d3.select("svg").remove();
 
+
   // Gör ritområdet med margins
   const canvas = d3.select("#lines").append("svg").attr("width", width+margin.left+margin.right).attr("height", height+margin.top+margin.bottom);
 
@@ -101,30 +103,45 @@ const drawChart = () => {
   //.curve(d3.curveCardinal);
 
   // Gör en grupp som vi kan flytta runt på
-  let histogramGroup = canvas.append("g").attr("transform","translate("+margin.left+","+margin.top+")")
+  const histogramGroup = canvas.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
   // rita en linje
   histogramGroup.append("path")
-    .attr("fill", "none")
     .attr("stroke", "red")
     .attr("d", path(colorCounts.red));
   histogramGroup.append("path")
-    .attr("fill", "none")
     .attr("stroke", "green")
     .attr("d", path(colorCounts.green));
   histogramGroup.append("path")
-    .attr("fill", "none")
     .attr("stroke", "blue")
     .attr("d", path(colorCounts.blue));
+  // level 1 style
+  histogramGroup.selectAll("path").attr("stroke-width",2).attr("fill","none");
+  
+  histogramGroup.append("text")             
+  .attr("transform",
+        "translate(" + (width/2) + " ," + 
+                       (height+margin.bottom) + ")")
+  .style("text-anchor", "middle")
+  .text("Color Value");
+
+  histogramGroup.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 0 - margin.left)
+  .attr("x",0 - (height / 2))
+  .attr("dy", "1em")
+  .style("text-anchor", "middle")
+  .text("Intensity");      
+
 
   // rita axises
   histogramGroup.append("g")
         .attr("class","axis y")
         .call(yAxis);
+
   histogramGroup.append("g")
                 .attr("class","axis x")
                 .attr("transform","translate(0,"+height+")")
                 .call(xAxis);
-
   
   // Bilden har garanterat blivit ritad då man ändrar boolean i slutet av funktionen
   hasBeenDrawn = true;
