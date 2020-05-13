@@ -16,7 +16,8 @@ const processData = (dataArray) => {
   }
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
-    let colorVal = temporaryCounts.r[dataArray[i]]; // colorVal blir antingen mängden occurences, eller undefined
+    // colorVal blir antingen antalet av den färgen, eller undefined om färgen inte fanns i objektet än
+    let colorVal = temporaryCounts.r[dataArray[i]];
     temporaryCounts.r[dataArray[i]] = colorVal ? colorVal + 1 : 1;
 
     colorVal = temporaryCounts.g[dataArray[i + 1]];
@@ -27,13 +28,13 @@ const processData = (dataArray) => {
   }
 
 
-  // Konverterar counts till en array av object
-  // Töm colorCounts från sin state först
+  // Töm colorCounts först
   colorCounts = {
     red: [],
     green: [],
     blue: []
   }
+  // Konverterar datan från temporaryCounts till en array av object
   for (const key in temporaryCounts.r) {
     colorCounts.red.push(
       { "intensity": key, "count": temporaryCounts.r[key] }
@@ -57,11 +58,12 @@ const drawChart = () => {
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
   const stroke_width = 2;
-  const fill_opacity = 1/3;
+  const fill_opacity = 1 / 2;
   const margin = { left: width / 4, right: width / 4, top: height / 4, bottom: height / 4 }
 
   const yScale = d3.scaleLinear()
-    .domain([0,
+  .domain([0,
+    // Ta reda på största antalet från red/green/blue
       d3.max([
         d3.max(colorCounts.red.map((v) => { return v.count })),
         d3.max(colorCounts.green.map((v) => { return v.count })),
@@ -159,7 +161,7 @@ const drawChart = () => {
     .attr("font-size", "20")
     .style("text-anchor", "middle")
     .text("Intensity");
-  // Bilden har garanterat blivit ritad, för resize functionen, då man ändrar boolean i slutet av funktionen
+  // Bilden har nu garanterat blivit ritad, så när resize händer får drawChart() kallas igen, och det finns data att rita om svg'n med
   hasBeenDrawn = true;
 }
 

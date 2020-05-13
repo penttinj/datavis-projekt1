@@ -31,4 +31,4 @@ gulp.task('webserver', function () {
     }));
 });
 
-gulp.task('default', ['html', 'webserver']);
+gulp.task('default', ['html', 'css', 'webserver', 'watch']);
