@@ -57,7 +57,8 @@ const processData = (dataArray) => {
 const drawChart = () => {
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
-  const margin = {left:width/4, right:width/4, top:height/4, bottom:height/4}
+  const stroke_width = 2;
+  const margin = { left: width / 4, right: width / 4, top: height / 4, bottom: height / 4 }
 
   const yScale = d3.scaleLinear()
     .domain([0,
@@ -74,87 +75,87 @@ const drawChart = () => {
     .range([0, width]);
 
   let yAxis = d3.axisLeft(yScale)
-                .ticks(5)
-                .tickPadding(15)
-                .tickSize(10);
+    .ticks(5)
+    .tickPadding(15)
+    .tickSize(10);
+  // Egna xAxis värden så det slutar på 255 eftersom vi talar färger
   let xAxis = d3.axisBottom(xScale)
-                .ticks(6)
-                .tickValues([0,50,100,150,200,255])
-                .tickPadding(15)
-                .tickSize(10);
+    .ticks(6)
+    .tickValues([0, 50, 100, 150, 200, 255])
+    .tickPadding(15)
+    .tickSize(10);
 
-    console.log("d3max:");
-    console.log(d3.max([
-      d3.max(colorCounts.red.map((v) => { return v.count })),
-      d3.max(colorCounts.green.map((v) => { return v.count })),
-      d3.max(colorCounts.blue.map((v) => { return v.count }))
-    ]));
+  console.log("d3max:");
+  console.log(d3.max([
+    d3.max(colorCounts.red.map((v) => { return v.count })),
+    d3.max(colorCounts.green.map((v) => { return v.count })),
+    d3.max(colorCounts.blue.map((v) => { return v.count }))
+  ]));
 
   d3.select("svg").remove();
 
 
   // Gör ritområdet med margins
   const canvas = d3.select("#lines")
-                    .append("svg")
-                    .attr("width", width+margin.left+margin.right)
-                    .attr("height", height+margin.top+margin.bottom);
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
 
-  // d3.line() är en egenerator som genererar en sträng för d="M x y ..."
+  // d3.area() istället för line så vi kan fylla den fint
   const area = d3.area()
     .x((data, i) => { return xScale(data.intensity) })
     .y1((data, i) => yScale(data.count))
     .y0(yScale(0));
-  //.curve(d3.curveCardinal);
 
   // Gör en grupp som vi kan flytta runt på
   const histogramGroup = canvas.append("g")
-                              .attr("transform","translate("+margin.left+","+margin.top+")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   // rita en linje
   histogramGroup.append("path")
-                .attr("stroke", "red")
-                .attr("d", area(colorCounts.red));
+    .attr("stroke", "red")
+    .attr("d", area(colorCounts.red));
   histogramGroup.append("path")
-                .attr("stroke", "green")
-                .attr("d", area(colorCounts.green));
+    .attr("stroke", "green")
+    .attr("d", area(colorCounts.green));
   histogramGroup.append("path")
-                .attr("stroke", "blue")
-                .attr("d", area(colorCounts.blue));
-  // level 1 style
+    .attr("stroke", "blue")
+    .attr("d", area(colorCounts.blue));
+  // style på en linje
   histogramGroup.selectAll("path")
-                .attr("stroke-width",2)
-                .attr("fill","none");
-
-
-                // Prova med en fill men den går inte i botten
-                // function(){this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke");}
-  histogramGroup.selectAll("path").on("mousemove", function(){this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke");d3.select(this).raise();})
-                                  .on("mouseout", function(){this.style.fill = "none"});
-  histogramGroup.append("text")             
-  .attr("transform",
-        "translate(" + (width/2) + " ," + 
-                       (height+margin.bottom/2) + ")")
-  .style("text-anchor", "middle")
-  .text("Color Value");
-
-  histogramGroup.append("text")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 0 - margin.left / 2)
-  .attr("x",0 - (height / 2))
-  .attr("dy", "1em")
-  .style("text-anchor", "middle")
-  .text("Intensity");      
-
-
+    .attr("stroke-width", stroke_width)
+    .attr("fill", "none");
+  // mouseover fill
+  histogramGroup.selectAll("path")
+    .on("mousemove", function () { this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke"); d3.select(this).raise(); })
+    .on("mouseout", function () { this.style.fill = "none" });
   // rita axises
   histogramGroup.append("g")
-        .attr("class","axis y")
-        .call(yAxis);
+    .attr("class", "axis y")
+    .call(yAxis);
 
   histogramGroup.append("g")
-                .attr("class","axis x")
-                .attr("transform","translate(0,"+height+")")
-                .call(xAxis);
-  
+    .attr("class", "axis x")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+  // axis labels
+  histogramGroup.append("text")
+    .attr("transform",
+      "translate(" + (width / 2) + " ," +
+      (height + margin.bottom / 2) + ")")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "20")
+    .style("text-anchor", "middle")
+    .text("Color Value");
+
+  histogramGroup.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left / 2)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "20")
+    .style("text-anchor", "middle")
+    .text("Intensity");
   // Bilden har garanterat blivit ritad då man ändrar boolean i slutet av funktionen
   hasBeenDrawn = true;
 }
