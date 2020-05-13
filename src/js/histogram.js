@@ -61,21 +61,22 @@ const drawChart = () => {
   const fill_opacity = 1 / 2;
   const margin = { left: width / 4, right: width / 4, top: height / 4, bottom: height / 4 }
 
+  // Ta reda på största antalet från red/green/blue
+  const maxIntensity = d3.max([
+    d3.max(colorCounts.red.map((v) => { return v.count })),
+    d3.max(colorCounts.green.map((v) => { return v.count })),
+    d3.max(colorCounts.blue.map((v) => { return v.count }))
+  ]);
+
+  // Gör scalorna
   const yScale = d3.scaleLinear()
-  .domain([0,
-    // Ta reda på största antalet från red/green/blue
-      d3.max([
-        d3.max(colorCounts.red.map((v) => { return v.count })),
-        d3.max(colorCounts.green.map((v) => { return v.count })),
-        d3.max(colorCounts.blue.map((v) => { return v.count }))
-      ])
-    ])
+    .domain([0, maxIntensity])
     .range([height, 0]);
 
   const xScale = d3.scaleLinear()
     .domain([0, 255])
     .range([0, width]);
-
+  // Gör axlarna
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
     .tickPadding(15)
@@ -87,21 +88,16 @@ const drawChart = () => {
     .tickPadding(15)
     .tickSize(10);
 
-  console.log("d3max:");
-  console.log(d3.max([
-    d3.max(colorCounts.red.map((v) => { return v.count })),
-    d3.max(colorCounts.green.map((v) => { return v.count })),
-    d3.max(colorCounts.blue.map((v) => { return v.count }))
-  ]));
-
+  //Tömmer svg för resize och image loading
   d3.select("svg").remove();
-
 
   // Gör ritområdet med margins
   const canvas = d3.select("#lines")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom);
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   // d3.area() istället för line så vi kan fylla den fint
   const area = d3.area()
@@ -109,9 +105,8 @@ const drawChart = () => {
     .y1((data, i) => yScale(data.count))
     .y0(yScale(0));
 
-  // Gör en grupp som vi kan flytta runt på
-  const histogramGroup = canvas.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // Gör en grupp för färgerna
+  const histogramGroup = canvas.append("g").attr("class", "RGB");
   // rita en linje
   histogramGroup.append("path")
     .attr("stroke", "red")
@@ -134,25 +129,26 @@ const drawChart = () => {
     .on("mousemove", function () { this.style.opacity = 1.0; d3.select(this).raise(); })
     .on("mouseout", function () { this.style.opacity = fill_opacity });
   // rita axises
-  histogramGroup.append("g")
+  canvas.append("g")
     .attr("class", "axis y")
     .call(yAxis);
 
-  histogramGroup.append("g")
+  canvas.append("g")
     .attr("class", "axis x")
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
   // axis labels
-  histogramGroup.append("text")
+  const labels = canvas.append("g").attr("class","labels");
+  labels.append("text")
     .attr("transform",
       "translate(" + (width / 2) + " ," +
       (height + margin.bottom / 2) + ")")
-      .attr("font-family", "sans-serif")
-      .attr("font-size", "20")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", "20")
     .style("text-anchor", "middle")
     .text("Color Value");
 
-  histogramGroup.append("text")
+  labels.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 0 - margin.left / 2)
     .attr("x", 0 - (height / 2))
