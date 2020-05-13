@@ -4,15 +4,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LineChart övning</title>
+  <title>Penttinj & Kuvajaan - VOID</title>
+  <link rel = "stylesheet" type = "text/css" href = "css/styles.css" />
   <script defer src="https://d3js.org/d3.v5.js"></script>
   <script defer src="js/histogram.js"></script>
 </head>
 
 <body>
-  <h1>Visualisera histogram av bilddata</h1>
-  <input type="file" id="input" />
-  <div id="lines"></div>
+  <div class="content">  
+    <h1>Visualization Of Image Data</h1>
+    <p class="instructions">
+      The histogram of an image normally refers to a histogram of the pixel intensity values.<br/>
+      The following histogram shows the number of pixels in an image at each different intensity value found in your image.
+    </p>
+    <input type="file" id="input" />
+    <div id="lines"></div>
+  </div>
   <canvas hidden=true id="canvas">Din webbläsare stöder inte canvas!</canvas>
 </body>
 

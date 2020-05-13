@@ -23,7 +23,7 @@ Requires Node version 11.
 3. Run dev server `npm run gulp`
 
 ## Preview
-[![Image of thesourmango](https://github.com/thesourmango.png?size=200)](https://github.com/thesourmango)
+![Preview Image](/preview.gif)
 
 
 ## Contribution
