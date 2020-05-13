@@ -113,6 +113,16 @@ const drawChart = () => {
   // Gör en grupp som vi kan flytta runt på
   const histogramGroup = canvas.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    // Create a rect on top of the svg area: this rectangle recovers mouse position
+  histogramGroup
+  .append('rect')
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', mouseover)
+    .on('mousemove', mousemove)
+    .on('mouseout', mouseout);
   // rita en linje
   histogramGroup.append("path")
     .attr("stroke", "red")
@@ -166,49 +176,50 @@ const drawChart = () => {
 
   // mouseover data tack vare https://www.d3-graph-gallery.com/graph/line_cursor.html
   var bisect = d3.bisector(function (d) { return d.intensity; }).left;
-  var focus = histogramGroup
-    .append('g')
-    .append('circle')
-    .style("fill", "none")
-    .attr("stroke", "black")
-    .attr('r', 8.5)
-    .style("opacity", 0)
-
-  var focusText = histogramGroup
-    .append('g')
-    .append('text')
-    .style("opacity", 0)
-    .attr("text-anchor", "left")
-    .attr("alignment-baseline", "middle");
-  // Create a rect on top of the svg area: this rectangle recovers mouse position
-  histogramGroup
-    .on('mouseover', mouseover)
-    .on('mousemove', mousemove)
-    .on('mouseout', mouseout);
+  var focus = {
+    red: histogramGroup
+      .append('g')
+      .append('circle')
+      .style("fill", "white")
+      .attr("stroke", "white")
+      .attr('r', 8.5)
+      .style("opacity", 0)
+  }
+  var focusText = {
+    red: histogramGroup
+      .append('g')
+      .append('text')
+      .style("opacity", 0)
+      .attr("text-anchor", "left")
+      .attr("alignment-baseline", "middle")
+  }
+  
 
   function mouseover() {
-    focus.style("opacity", 1)
-    focusText.style("opacity", 1)
+    focus.red.style("opacity", 1)
+    focusText.red.style("opacity", 1)
   }
   function mousemove() {
     // recover coordinate we need
     let x0 = xScale.invert(d3.mouse(this)[0]);
-    console.log("d3mouse: ", d3.mouse(this)[0]);
-    console.log("invert: ", xScale.invert(d3.mouse(this)[0]));
     let i = bisect(colorCounts.red, x0, 1);
     selectedData = colorCounts.red[i];
-    focus
+    focus.red
       .attr("cx", xScale(selectedData.intensity))
       .attr("cy", yScale(selectedData.count))
-    focusText
+      .style("opacity", 1)
+      .attr("stroke", "white")
+      
+    focusText.red
       .html("Röd:" + selectedData.intensity + "  -  " + "Mängd:" + selectedData.count)
       .attr("x", xScale(selectedData.intensity) + 15)
       .attr("y", yScale(selectedData.count))
+      .raise()
 
   }
   function mouseout() {
-    focus.style("opacity", 0)
-    focusText.style("opacity", 0)
+    focus.red.style("opacity", 0)
+    focusText.red.style("opacity", 0)
   }
 
 
