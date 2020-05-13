@@ -57,7 +57,7 @@ const processData = (dataArray) => {
 const drawChart = () => {
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
-  const margin = {left:120, right:120, top:80, bottom:40}
+  const margin = {left:width/4, right:width/4, top:height/4, bottom:height/4}
 
   const yScale = d3.scaleLinear()
     .domain([0,
@@ -94,39 +94,51 @@ const drawChart = () => {
 
 
   // Gör ritområdet med margins
-  const canvas = d3.select("#lines").append("svg").attr("width", width+margin.left+margin.right).attr("height", height+margin.top+margin.bottom);
+  const canvas = d3.select("#lines")
+                    .append("svg")
+                    .attr("width", width+margin.left+margin.right)
+                    .attr("height", height+margin.top+margin.bottom);
 
   // d3.line() är en egenerator som genererar en sträng för d="M x y ..."
-  const path = d3.line()
+  const area = d3.area()
     .x((data, i) => { return xScale(data.intensity) })
-    .y((data, i) => yScale(data.count))
+    .y1((data, i) => yScale(data.count))
+    .y0(yScale(0));
   //.curve(d3.curveCardinal);
 
   // Gör en grupp som vi kan flytta runt på
-  const histogramGroup = canvas.append("g").attr("transform","translate("+margin.left+","+margin.top+")");
+  const histogramGroup = canvas.append("g")
+                              .attr("transform","translate("+margin.left+","+margin.top+")");
   // rita en linje
   histogramGroup.append("path")
-    .attr("stroke", "red")
-    .attr("d", path(colorCounts.red));
+                .attr("stroke", "red")
+                .attr("d", area(colorCounts.red));
   histogramGroup.append("path")
-    .attr("stroke", "green")
-    .attr("d", path(colorCounts.green));
+                .attr("stroke", "green")
+                .attr("d", area(colorCounts.green));
   histogramGroup.append("path")
-    .attr("stroke", "blue")
-    .attr("d", path(colorCounts.blue));
+                .attr("stroke", "blue")
+                .attr("d", area(colorCounts.blue));
   // level 1 style
-  histogramGroup.selectAll("path").attr("stroke-width",2).attr("fill","none");
-  
+  histogramGroup.selectAll("path")
+                .attr("stroke-width",2)
+                .attr("fill","none");
+
+
+                // Prova med en fill men den går inte i botten
+                // function(){this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke");}
+  histogramGroup.selectAll("path").on("mousemove", function(){this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke");d3.select(this).raise();})
+                                  .on("mouseout", function(){this.style.fill = "none"});
   histogramGroup.append("text")             
   .attr("transform",
         "translate(" + (width/2) + " ," + 
-                       (height+margin.bottom) + ")")
+                       (height+margin.bottom/2) + ")")
   .style("text-anchor", "middle")
   .text("Color Value");
 
   histogramGroup.append("text")
   .attr("transform", "rotate(-90)")
-  .attr("y", 0 - margin.left)
+  .attr("y", 0 - margin.left / 2)
   .attr("x",0 - (height / 2))
   .attr("dy", "1em")
   .style("text-anchor", "middle")
