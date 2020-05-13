@@ -4,6 +4,7 @@ let colorCounts = {
   green: [],
   blue: []
 }
+// För resize eventlistner
 let hasBeenDrawn = false;
 
 const processData = (dataArray) => {
@@ -26,9 +27,7 @@ const processData = (dataArray) => {
   }
 
 
-  /*
-  * Konverterar counts till en array av object
-  */
+  // Konverterar counts till en array av object
   // Töm colorCounts från sin state först
   colorCounts = {
     red: [],
@@ -58,6 +57,7 @@ const drawChart = () => {
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
   const stroke_width = 2;
+  const fill_opacity = 1/3;
   const margin = { left: width / 4, right: width / 4, top: height / 4, bottom: height / 4 }
 
   const yScale = d3.scaleLinear()
@@ -74,12 +74,12 @@ const drawChart = () => {
     .domain([0, 255])
     .range([0, width]);
 
-  let yAxis = d3.axisLeft(yScale)
+  const yAxis = d3.axisLeft(yScale)
     .ticks(5)
     .tickPadding(15)
     .tickSize(10);
   // Egna xAxis värden så det slutar på 255 eftersom vi talar färger
-  let xAxis = d3.axisBottom(xScale)
+  const xAxis = d3.axisBottom(xScale)
     .ticks(6)
     .tickValues([0, 50, 100, 150, 200, 255])
     .tickPadding(15)
@@ -113,21 +113,24 @@ const drawChart = () => {
   // rita en linje
   histogramGroup.append("path")
     .attr("stroke", "red")
+    .attr("fill", "red")
     .attr("d", area(colorCounts.red));
   histogramGroup.append("path")
     .attr("stroke", "green")
+    .attr("fill", "green")
     .attr("d", area(colorCounts.green));
   histogramGroup.append("path")
     .attr("stroke", "blue")
+    .attr("fill", "blue")
     .attr("d", area(colorCounts.blue));
-  // style på en linje
+  // stroke-width och opacity av paths
   histogramGroup.selectAll("path")
     .attr("stroke-width", stroke_width)
-    .attr("fill", "none");
+    .attr("opacity", fill_opacity);
   // mouseover fill
   histogramGroup.selectAll("path")
-    .on("mousemove", function () { this.style.fill = window.getComputedStyle(this).getPropertyValue("stroke"); d3.select(this).raise(); })
-    .on("mouseout", function () { this.style.fill = "none" });
+    .on("mousemove", function () { this.style.opacity = 1.0; d3.select(this).raise(); })
+    .on("mouseout", function () { this.style.opacity = fill_opacity });
   // rita axises
   histogramGroup.append("g")
     .attr("class", "axis y")
@@ -156,7 +159,7 @@ const drawChart = () => {
     .attr("font-size", "20")
     .style("text-anchor", "middle")
     .text("Intensity");
-  // Bilden har garanterat blivit ritad då man ändrar boolean i slutet av funktionen
+  // Bilden har garanterat blivit ritad, för resize functionen, då man ändrar boolean i slutet av funktionen
   hasBeenDrawn = true;
 }
 
