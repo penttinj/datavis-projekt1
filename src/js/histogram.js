@@ -15,6 +15,8 @@ const barWidth = 5;
 
 // För resize eventlistner
 let hasBeenDrawn = false;
+// Bestämmer om histogram eller linechart ska ritas
+let drawLineChart = false;
 
 
 const processData = (dataArray) => {
@@ -23,11 +25,11 @@ const processData = (dataArray) => {
     g: {},
     b: {},
   }
-const barColorCounts = {
-  red: new Array(255),
-  blue: new Array(255),
-  green: new Array(255),
-}
+  const barColorCounts = {
+    red: new Array(255),
+    blue: new Array(255),
+    green: new Array(255),
+  }
 
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
@@ -70,14 +72,14 @@ const barColorCounts = {
   }
   console.log("colorcountsbar: ", barColorCounts);
 
- 
+
 
   for (let i = 0; i < 255; i += barWidth) {
-    barRenderCounts.red.push(d3.max(barColorCounts.red.slice(i, i+barWidth)));
-    barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
-    barRenderCounts.blue.push(d3.max(barColorCounts.blue.slice(i, i+barWidth)));
+    barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + barWidth)));
+    barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + barWidth)));
+    barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + barWidth)));
   }
-  
+
 
 
 }
@@ -94,11 +96,17 @@ const drawChart = () => {
   d3.select("svg").remove("*");
 
   // Ta reda på största antalet från red/green/blue
-  const maxIntensity = d3.max([
-    d3.max(colorCounts.red.map((v) => { return v.count })),
-    d3.max(colorCounts.green.map((v) => { return v.count })),
-    d3.max(colorCounts.blue.map((v) => { return v.count }))
-  ]);
+  const maxIntensity = drawLineChart ?
+    d3.max([
+      d3.max(colorCounts.red.map((v) => { return v.count })),
+      d3.max(colorCounts.green.map((v) => { return v.count })),
+      d3.max(colorCounts.blue.map((v) => { return v.count }))
+    ]) :
+    d3.max([
+      d3.max(barRenderCounts.red),
+      d3.max(barRenderCounts.green),
+      d3.max(barRenderCounts.blue)
+    ]);
 
   // Barchart variabler
   const yScaleBarchart = d3.scaleLinear()
@@ -120,7 +128,7 @@ const drawChart = () => {
     .tickSize(10);
   // Egna xAxis värden så det slutar på 255 eftersom vi talar färger
   const xAxis = d3.axisBottom(xScale)
-    .ticks(255/barWidth)/*
+    .ticks(255 / barWidth)/*
     .tickValues([0, 50, 100, 150, 200, 255])
     .tickPadding(15)
     .tickSize(10)*/;
@@ -151,7 +159,7 @@ const drawChart = () => {
     .append('rect')
     .style("fill", "none")
     .style("pointer-events", "all")
-    .attr('width', width-1)
+    .attr('width', width - 1)
     .attr('height', height)
     .on('mouseover', mouseover)
     .on('mousemove', mousemove)
@@ -164,7 +172,7 @@ const drawChart = () => {
   // rektangel
   console.log("barrender", barRenderCounts);
 
-    canvas.append("g")
+  canvas.append("g")
     .attr("class", "redgroup")
     .selectAll("röda")
     .data(barRenderCounts.red)
@@ -175,7 +183,7 @@ const drawChart = () => {
     .attr("x", (data, i) => { return xScale(i * barWidth) })
     .attr("height", (data) => { return yScaleBarchart(data) })
     .attr("y", (data) => { return height - yScaleBarchart(data) });
-    canvas.append("g")
+  canvas.append("g")
     .attr("class", "greengroup")
     .selectAll("gröna")
     .data(barRenderCounts.green)
@@ -186,7 +194,7 @@ const drawChart = () => {
     .attr("x", (data, i) => { return xScale(i * barWidth) })
     .attr("height", (data) => { return yScaleBarchart(data) })
     .attr("y", (data) => { return height - yScaleBarchart(data) });
-    canvas.append("g")
+  canvas.append("g")
     .attr("class", "bluegroup")
     .selectAll("blåa")
     .data(barRenderCounts.blue)
