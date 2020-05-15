@@ -4,16 +4,42 @@ let colorCounts = {
   green: [],
   blue: []
 }
+const barRenderCounts = {
+  red: [],
+  green: [],
+  blue: []
+}
+
 // För resize eventlistner
 let hasBeenDrawn = false;
 
+const testArray = new Array(254);
+console.log("length: ", testArray);
+for (let i = 3; i < 12; i++) {
+  testArray[i] = 80 - i;
+}
+testArray[300] = 9000;
+console.log("slice ", testArray.slice(0, 20));
+
+console.log("max: ", d3.max(testArray.slice(0, 400)));
+
+
+
+
+
 const processData = (dataArray) => {
-  console.log("dataarray", dataArray.length);
+  const barWidth = 5;
   const temporaryCounts = {
     r: {},
     g: {},
     b: {},
   }
+  const barColorCounts = {
+    red: new Array(255),
+    blue: new Array(255),
+    green: new Array(255),
+  }
+
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
     // colorVal blir antingen antalet av den färgen, eller undefined om färgen inte fanns i objektet än
@@ -34,23 +60,32 @@ const processData = (dataArray) => {
     green: [],
     blue: []
   }
+
   // Konverterar datan från temporaryCounts till en array av object
   for (const key in temporaryCounts.r) {
-    colorCounts.red.push(
-      { "intensity": key, "count": temporaryCounts.r[key] }
-    )
+    colorCounts.red.push({ "intensity": key, "count": temporaryCounts.r[key] });
+    barColorCounts.red[key] = temporaryCounts.r[key];
   }
   for (const key in temporaryCounts.g) {
-    colorCounts.green.push(
-      { "intensity": key, "count": temporaryCounts.g[key] }
-    )
+    colorCounts.green.push({ "intensity": key, "count": temporaryCounts.g[key] })
+    barColorCounts.green[key] = temporaryCounts.g[key];
   }
   for (const key in temporaryCounts.b) {
-    colorCounts.blue.push(
-      { "intensity": key, "count": temporaryCounts.b[key] }
-    )
+    colorCounts.blue.push({ "intensity": key, "count": temporaryCounts.b[key] })
+    barColorCounts.blue[key] = temporaryCounts.b[key];
   }
-  console.log("colorcounts: ", colorCounts);
+  console.log("colorcountsbar: ", barColorCounts);
+
+ 
+
+  for (let i = 0; i < 255; i += barWidth) {
+    barRenderCounts.red.push(d3.max(barColorCounts.red.slice(i, i+barWidth-1)));
+    //barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth-1)));
+    //barRenderCounts.blue.push(d3.max(barColorCounts.green.slice(i, i+barWidth-1)));
+  }
+  
+
+
 }
 
 
@@ -67,6 +102,12 @@ const drawChart = () => {
     d3.max(colorCounts.green.map((v) => { return v.count })),
     d3.max(colorCounts.blue.map((v) => { return v.count }))
   ]);
+
+  // Barchart variabler
+  const yScaleBarchart = d3.scaleLinear()
+    .domain([0, maxIntensity])
+    .range([0, height]);
+  const barWidth = 5;
 
   // Gör scalorna
   const yScale = d3.scaleLinear()
@@ -127,6 +168,20 @@ const drawChart = () => {
     .attr("stroke", "red")
     .attr("fill", "red")
     .attr("d", area(colorCounts.red));
+  // rektangel
+  console.log("barrender", barRenderCounts);
+  histogramGroup.append("g")
+    .attr("class", "redgroup")
+    .selectAll("röda")
+    .data(barRenderCounts.red)
+    .enter()
+    .append("rect")
+    .attr("fill", "red")
+    .attr("width", xScale(barWidth))
+    .attr("x", (data, i) => { return xScale(i * barWidth) })
+    .attr("height", (data) => { console.log("gör något"); return yScaleBarchart(data.count) })
+    .attr("y", (data) => { return height - yScaleBarchart(data.count) })
+
   histogramGroup.append("path")
     .attr("stroke", "green")
     .attr("fill", "green")
