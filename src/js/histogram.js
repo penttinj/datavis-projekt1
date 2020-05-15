@@ -67,8 +67,8 @@ const processData = (dataArray) => {
 
   for (let i = 0; i < 255; i += barWidth) {
     barRenderCounts.red.push(d3.max(barColorCounts.red.slice(i, i+barWidth)));
-    //barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
-    //barRenderCounts.blue.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
+    barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
+    barRenderCounts.blue.push(d3.max(barColorCounts.blue.slice(i, i+barWidth)));
   }
   
 
@@ -157,7 +157,8 @@ const drawChart = () => {
     .attr("d", area(colorCounts.red));
   // rektangel
   console.log("barrender", barRenderCounts);
-  histogramGroup.append("g")
+
+    canvas.append("g")
     .attr("class", "redgroup")
     .selectAll("röda")
     .data(barRenderCounts.red)
@@ -166,8 +167,30 @@ const drawChart = () => {
     .attr("fill", "red")
     .attr("width", xScale(barWidth))
     .attr("x", (data, i) => { return xScale(i * barWidth) })
-    .attr("height", (data) => { console.log("gör något"); return yScaleBarchart(data) })
-    .attr("y", (data) => { return height - yScaleBarchart(data) })
+    .attr("height", (data) => { return yScaleBarchart(data) })
+    .attr("y", (data) => { return height - yScaleBarchart(data) });
+    canvas.append("g")
+    .attr("class", "greengroup")
+    .selectAll("gröna")
+    .data(barRenderCounts.green)
+    .enter()
+    .append("rect")
+    .attr("fill", "green")
+    .attr("width", xScale(barWidth))
+    .attr("x", (data, i) => { return xScale(i * barWidth) })
+    .attr("height", (data) => { return yScaleBarchart(data) })
+    .attr("y", (data) => { return height - yScaleBarchart(data) });
+    canvas.append("g")
+    .attr("class", "bluegroup")
+    .selectAll("blåa")
+    .data(barRenderCounts.blue)
+    .enter()
+    .append("rect")
+    .attr("fill", "blue")
+    .attr("width", xScale(barWidth))
+    .attr("x", (data, i) => { return xScale(i * barWidth) })
+    .attr("height", (data) => { return yScaleBarchart(data) })
+    .attr("y", (data) => { return height - yScaleBarchart(data) });
 
   histogramGroup.append("path")
     .attr("stroke", "green")
