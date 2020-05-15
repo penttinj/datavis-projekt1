@@ -4,28 +4,30 @@ let colorCounts = {
   green: [],
   blue: []
 }
-const barRenderCounts = {
+let barRenderCounts = {
   red: [],
   green: [],
   blue: []
 }
+
+// Används för att processera data och rita bars
+const barWidth = 5;
 
 // För resize eventlistner
 let hasBeenDrawn = false;
 
 
 const processData = (dataArray) => {
-  const barWidth = 5;
   const temporaryCounts = {
     r: {},
     g: {},
     b: {},
   }
-  const barColorCounts = {
-    red: new Array(255),
-    blue: new Array(255),
-    green: new Array(255),
-  }
+const barColorCounts = {
+  red: new Array(255),
+  blue: new Array(255),
+  green: new Array(255),
+}
 
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
@@ -41,8 +43,13 @@ const processData = (dataArray) => {
   }
 
 
-  // Töm colorCounts först
+  // Töm tabeller först
   colorCounts = {
+    red: [],
+    green: [],
+    blue: []
+  }
+  barRenderCounts = {
     red: [],
     green: [],
     blue: []
@@ -83,6 +90,9 @@ const drawChart = () => {
   const fill_opacity = 1 / 2;
   const margin = { left: width / 4, right: width / 4, top: height / 4, bottom: height / 4 }
 
+  //Tömmer svg för resize och image loading
+  d3.select("svg").remove("*");
+
   // Ta reda på största antalet från red/green/blue
   const maxIntensity = d3.max([
     d3.max(colorCounts.red.map((v) => { return v.count })),
@@ -94,7 +104,6 @@ const drawChart = () => {
   const yScaleBarchart = d3.scaleLinear()
     .domain([0, maxIntensity])
     .range([0, height]);
-  const barWidth = 5;
 
   // Gör scalorna
   const yScale = d3.scaleLinear()
@@ -111,13 +120,10 @@ const drawChart = () => {
     .tickSize(10);
   // Egna xAxis värden så det slutar på 255 eftersom vi talar färger
   const xAxis = d3.axisBottom(xScale)
-    .ticks(6)
+    .ticks(255/barWidth)/*
     .tickValues([0, 50, 100, 150, 200, 255])
     .tickPadding(15)
-    .tickSize(10);
-
-  //Tömmer svg för resize och image loading
-  d3.select("svg").remove();
+    .tickSize(10)*/;
 
   // Gör ritområdet med margins
   const canvas = d3.select("#lines")
@@ -306,7 +312,6 @@ const drawChart = () => {
     focus[color].style("opacity", opacity);
     focusText[color].style("opacity", opacity);
   }
-
 
   // Bilden har nu garanterat blivit ritad, så när resize händer får drawChart() kallas igen, och det finns data att rita om svg'n med
   hasBeenDrawn = true;
