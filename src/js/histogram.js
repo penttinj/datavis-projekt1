@@ -151,7 +151,7 @@ const drawChart = () => {
     .append('rect')
     .style("fill", "none")
     .style("pointer-events", "all")
-    .attr('width', width)
+    .attr('width', width-1)
     .attr('height', height)
     .on('mouseover', mouseover)
     .on('mousemove', mousemove)
