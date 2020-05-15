@@ -109,9 +109,9 @@ const drawChart = () => {
   const histogramGroup = canvas.append("g").attr("class", "RGB");
   // Mouseover event listeners för grafen
   histogramGroup
-  .on('mouseover', mouseover)
-  .on('mousemove', mousemove)
-  .on('mouseout', mouseout);
+    .on('mouseover', mouseover)
+    .on('mousemove', mousemove)
+    .on('mouseout', mouseout);
   // Mouseover event listeners för området utanför grafen
   histogramGroup
     .append('rect')
@@ -153,7 +153,7 @@ const drawChart = () => {
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
   // axis labels
-  const labels = canvas.append("g").attr("class","labels");
+  const labels = canvas.append("g").attr("class", "labels");
   labels.append("text")
     .attr("transform",
       "translate(" + (width / 2) + " ," +
@@ -176,50 +176,70 @@ const drawChart = () => {
 
   // mouseover data tack vare https://www.d3-graph-gallery.com/graph/line_cursor.html
   var bisect = d3.bisector(function (d) { return d.intensity; }).left;
-  var focus = {
-    red: canvas
+  let focusGroup = canvas.append("g").attr("class", "focus");
+  let focusTextGroup = canvas.append("g").attr("class", "focusText");
+  let focus = {};
+  let focusText = {};
+  addFocusAndFocusTextGroups("red");
+  addFocusAndFocusTextGroups("green");
+  addFocusAndFocusTextGroups("blue");
+
+
+  function addFocusAndFocusTextGroups(color) {
+    focus[color] = focusGroup
       .append('g')
       .style("pointer-events", "none")
       .append('circle')
-      .style("fill", "none")
+      .style("fill", color)
       .attr("stroke", "black")
       .attr('r', 7.5)
-      .style("opacity", 0)
-  }
-  var focusText = {
-    red: canvas
+      .style("opacity", 0);
+    focusText[color] = focusTextGroup
       .append('g')
       .append('text')
       .style("opacity", 0)
       .attr("text-anchor", "left")
       .attr("alignment-baseline", "middle")
   }
-  
 
   function mouseover() {
-    focus.red.style("opacity", 1)
-    focusText.red.style("opacity", 1)
+    changeMouseOverOpacity("red", 1);
+    changeMouseOverOpacity("green", 1);
+    changeMouseOverOpacity("blue", 1);
   }
+
   function mousemove() {
     // recover coordinate we need
-    let x0 = xScale.invert(d3.mouse(this)[0]);
-    let i = bisect(colorCounts.red, x0, 1);
-    selectedData = colorCounts.red[i];
-    focus.red
-      .attr("cx", xScale(selectedData.intensity))
-      .attr("cy", yScale(selectedData.count))
-      
-      
-    focusText.red
-      .html("Röd:" + selectedData.intensity + "  -  " + "Mängd:" + selectedData.count)
-      .attr("x", xScale(selectedData.intensity) + 15)
-      .attr("y", yScale(selectedData.count))
-      .raise()
+    const x0 = xScale.invert(d3.mouse(this)[0]);
+
+    updateMouseOverData("red", x0);
+    updateMouseOverData("green", x0);
+    updateMouseOverData("blue", x0);
 
   }
+
   function mouseout() {
-    focus.red.style("opacity", 0)
-    focusText.red.style("opacity", 0)
+    changeMouseOverOpacity("red", 0);
+    changeMouseOverOpacity("green", 0);
+    changeMouseOverOpacity("blue", 0);
+  }
+
+  function updateMouseOverData(color, x0) {
+    const i = bisect(colorCounts[color], x0, 1);
+    const selectedData = colorCounts[color][i];
+    focus[color]
+      .attr("cx", xScale(selectedData.intensity))
+      .attr("cy", yScale(selectedData.count));
+
+    focusText[color]
+      .html("x: " + selectedData.intensity + " y: " + selectedData.count)
+      .attr("x", xScale(selectedData.intensity) + 15)
+      .attr("y", yScale(selectedData.count));
+  }
+
+  function changeMouseOverOpacity(color, opacity) {
+    focus[color].style("opacity", opacity);
+    focusText[color].style("opacity", opacity);
   }
 
 
