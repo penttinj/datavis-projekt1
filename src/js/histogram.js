@@ -13,19 +13,6 @@ const barRenderCounts = {
 // För resize eventlistner
 let hasBeenDrawn = false;
 
-const testArray = new Array(254);
-console.log("length: ", testArray);
-for (let i = 3; i < 12; i++) {
-  testArray[i] = 80 - i;
-}
-testArray[300] = 9000;
-console.log("slice ", testArray.slice(0, 20));
-
-console.log("max: ", d3.max(testArray.slice(0, 400)));
-
-
-
-
 
 const processData = (dataArray) => {
   const barWidth = 5;
@@ -79,9 +66,9 @@ const processData = (dataArray) => {
  
 
   for (let i = 0; i < 255; i += barWidth) {
-    barRenderCounts.red.push(d3.max(barColorCounts.red.slice(i, i+barWidth-1)));
-    //barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth-1)));
-    //barRenderCounts.blue.push(d3.max(barColorCounts.green.slice(i, i+barWidth-1)));
+    barRenderCounts.red.push(d3.max(barColorCounts.red.slice(i, i+barWidth)));
+    //barRenderCounts.green.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
+    //barRenderCounts.blue.push(d3.max(barColorCounts.green.slice(i, i+barWidth)));
   }
   
 
@@ -179,8 +166,8 @@ const drawChart = () => {
     .attr("fill", "red")
     .attr("width", xScale(barWidth))
     .attr("x", (data, i) => { return xScale(i * barWidth) })
-    .attr("height", (data) => { console.log("gör något"); return yScaleBarchart(data.count) })
-    .attr("y", (data) => { return height - yScaleBarchart(data.count) })
+    .attr("height", (data) => { console.log("gör något"); return yScaleBarchart(data) })
+    .attr("y", (data) => { return height - yScaleBarchart(data) })
 
   histogramGroup.append("path")
     .attr("stroke", "green")
