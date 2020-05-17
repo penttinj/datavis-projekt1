@@ -18,7 +18,6 @@ let hasBeenDrawn = false;
 // Bestämmer om histogram eller linechart ska ritas
 let drawLineChart = false;
 
-
 const processData = (dataArray) => {
   const temporaryCounts = {
     r: {},
@@ -30,7 +29,6 @@ const processData = (dataArray) => {
     blue: new Array(255),
     green: new Array(255),
   }
-
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
     // colorVal blir antingen antalet av den färgen, eller undefined om färgen inte fanns i objektet än
@@ -43,8 +41,6 @@ const processData = (dataArray) => {
     colorVal = temporaryCounts.b[dataArray[i + 2]];
     temporaryCounts.b[dataArray[i + 2]] = colorVal ? colorVal + 1 : 1;
   }
-
-
   // Töm tabeller först
   colorCounts = {
     red: [],
@@ -56,7 +52,6 @@ const processData = (dataArray) => {
     green: [],
     blue: []
   }
-
   // Konverterar datan från temporaryCounts till en array av object
   for (const key in temporaryCounts.r) {
     colorCounts.red.push({ "intensity": key, "count": temporaryCounts.r[key] });
@@ -70,22 +65,17 @@ const processData = (dataArray) => {
     colorCounts.blue.push({ "intensity": key, "count": temporaryCounts.b[key] })
     barColorCounts.blue[key] = temporaryCounts.b[key];
   }
-  console.log("colorcountsbar: ", barColorCounts);
-
-
 
   for (let i = 0; i < 255; i += barWidth) {
     barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + barWidth)));
     barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + barWidth)));
     barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + barWidth)));
   }
-
-
-
 }
 
 
 const drawChart = () => {
+
   const width = window.innerWidth / 2;
   const height = window.innerHeight / 2;
   const stroke_width = 2;
@@ -108,30 +98,22 @@ const drawChart = () => {
       d3.max(barRenderCounts.blue)
     ]);
 
-  // Barchart variabler
+  // Gör scalor, xScale och yScale för vardera bars eller paths
   const yScaleBarchart = d3.scaleLinear()
     .domain([0, maxIntensity])
     .range([0, height]);
-
-  // Gör scalorna
   const yScale = d3.scaleLinear()
     .domain([0, maxIntensity])
     .range([height, 0]);
-
   const xScale = d3.scaleLinear()
     .domain([0, 255])
     .range([0, width]);
-  // Gör axlarna
+
+  // Gör yAxeln eftersom den är samma för både bars och paths
   const yAxis = d3.axisLeft(yScale)
     .ticks(5)
     .tickPadding(15)
     .tickSize(10);
-  // Egna xAxis värden så det slutar på 255 eftersom vi talar färger
-  const xAxis = d3.axisBottom(xScale)
-    .ticks(255 / barWidth)/*
-    .tickValues([0, 50, 100, 150, 200, 255])
-    .tickPadding(15)
-    .tickSize(10)*/;
 
   // Gör ritområdet med margins
   const canvas = d3.select("#lines")
@@ -141,97 +123,187 @@ const drawChart = () => {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // d3.area() istället för line så vi kan fylla den fint
-  const area = d3.area()
-    .x((data, i) => { return xScale(data.intensity) })
-    .y1((data, i) => yScale(data.count))
-    .y0(yScale(0));
-
-  // Gör en grupp för färgerna
-  const histogramGroup = canvas.append("g").attr("class", "RGB");
-  // Mouseover event listeners för grafen
-  histogramGroup
-    .on('mouseover', mouseover)
-    .on('mousemove', mousemove)
-    .on('mouseout', mouseout);
-  // Mouseover event listeners för området utanför grafen
-  histogramGroup
-    .append('rect')
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .attr('width', width - 1)
-    .attr('height', height)
-    .on('mouseover', mouseover)
-    .on('mousemove', mousemove)
-    .on('mouseout', mouseout);
-
-  // rektangel
-  console.log("barrender", barRenderCounts);
-  const barGroup = canvas.append("g").attr("class","Bars");
-  barGroup.append("g")
-    .attr("class", "redgroup")
-    .selectAll("röda")
-    .data(barRenderCounts.red)
-    .enter()
-    .append("rect")
-    .attr("fill", "red")
-    .attr("width", xScale(barWidth))
-    .attr("x", (data, i) => { return xScale(i * barWidth) })
-    .attr("height", (data) => { return yScaleBarchart(data) })
-    .attr("y", (data) => { return height - yScaleBarchart(data) });
+  if (!drawLineChart) {
+    // rektangel
+    console.log("barrender", barRenderCounts);
+    const barGroup = canvas.append("g").attr("class", "Bars");
     barGroup.append("g")
-    .attr("class", "greengroup")
-    .selectAll("gröna")
-    .data(barRenderCounts.green)
-    .enter()
-    .append("rect")
-    .attr("fill", "green")
-    .attr("width", xScale(barWidth))
-    .attr("x", (data, i) => { return xScale(i * barWidth) })
-    .attr("height", (data) => { return yScaleBarchart(data) })
-    .attr("y", (data) => { return height - yScaleBarchart(data) });
+      .attr("class", "redgroup")
+      .selectAll("röda")
+      .data(barRenderCounts.red)
+      .enter()
+      .append("rect")
+      .attr("fill", "red")
+      .attr("width", xScale(barWidth))
+      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("height", (data) => { return yScaleBarchart(data) })
+      .attr("y", (data) => { return height - yScaleBarchart(data) });
     barGroup.append("g")
-    .attr("class", "bluegroup")
-    .selectAll("blåa")
-    .data(barRenderCounts.blue)
-    .enter()
-    .append("rect")
-    .attr("fill", "blue")
-    .attr("width", xScale(barWidth))
-    .attr("x", (data, i) => { return xScale(i * barWidth) })
-    .attr("height", (data) => { return yScaleBarchart(data) })
-    .attr("y", (data) => { return height - yScaleBarchart(data) });
+      .attr("class", "greengroup")
+      .selectAll("gröna")
+      .data(barRenderCounts.green)
+      .enter()
+      .append("rect")
+      .attr("fill", "green")
+      .attr("width", xScale(barWidth))
+      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("height", (data) => { return yScaleBarchart(data) })
+      .attr("y", (data) => { return height - yScaleBarchart(data) });
+    barGroup.append("g")
+      .attr("class", "bluegroup")
+      .selectAll("blåa")
+      .data(barRenderCounts.blue)
+      .enter()
+      .append("rect")
+      .attr("fill", "blue")
+      .attr("width", xScale(barWidth))
+      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("height", (data) => { return yScaleBarchart(data) })
+      .attr("y", (data) => { return height - yScaleBarchart(data) });
 
+
+
+    // Gör xAxeln
+    const xAxis = d3.axisBottom(xScale).ticks(255 / barWidth);
+    canvas.append("g")
+      .attr("class", "axis x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+  }
+  else {
+    // d3.area() istället för line så vi kan fylla den fint
+    const area = d3.area()
+      .x((data, i) => { return xScale(data.intensity) })
+      .y1((data, i) => yScale(data.count))
+      .y0(yScale(0));
+
+    // Gör en grupp för färgerna
+    const pathGroup = canvas.append("g").attr("class", "RGB");
+    // Mouseover event listeners för grafen
+    pathGroup
+      .on('mouseover', mouseover)
+      .on('mousemove', mousemove)
+      .on('mouseout', mouseout);
+    // Mouseover event listeners för området utanför grafen
+    pathGroup
+      .append('rect')
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .attr('width', width - 1)
+      .attr('height', height)
+      .on('mouseover', mouseover)
+      .on('mousemove', mousemove)
+      .on('mouseout', mouseout);
     // Rita Areas
-  histogramGroup.append("path")
-    .attr("stroke", "red")
-    .attr("fill", "red")
-    .attr("d", area(colorCounts.red));
-  histogramGroup.append("path")
-    .attr("stroke", "green")
-    .attr("fill", "green")
-    .attr("d", area(colorCounts.green));
-  histogramGroup.append("path")
-    .attr("stroke", "blue")
-    .attr("fill", "blue")
-    .attr("d", area(colorCounts.blue));
-  // stroke-width och opacity av paths
-  histogramGroup.selectAll("path")
-    .attr("stroke-width", stroke_width)
-    .attr("opacity", fill_opacity);
-  // mouseover fill
-  histogramGroup.selectAll("path")
-    .on("mousemove", function () { this.style.opacity = 1.0; d3.select(this).raise(); })
-    .on("mouseout", function () { this.style.opacity = fill_opacity });
+    pathGroup.append("path")
+      .attr("stroke", "red")
+      .attr("fill", "red")
+      .attr("d", area(colorCounts.red));
+    pathGroup.append("path")
+      .attr("stroke", "green")
+      .attr("fill", "green")
+      .attr("d", area(colorCounts.green));
+    pathGroup.append("path")
+      .attr("stroke", "blue")
+      .attr("fill", "blue")
+      .attr("d", area(colorCounts.blue));
+    // stroke-width och opacity av paths
+    pathGroup.selectAll("path")
+      .attr("stroke-width", stroke_width)
+      .attr("opacity", fill_opacity);
+    // mouseover fill
+    pathGroup.selectAll("path")
+      .on("mousemove", function () { this.style.opacity = 1.0; d3.select(this).raise(); })
+      .on("mouseout", function () { this.style.opacity = fill_opacity });
+
+
+
+    // Gör xAxeln
+    xAxis = d3.axisBottom(xScale)
+      .ticks(255 / barWidth)
+      .tickValues([0, 50, 100, 150, 200, 255])
+      .tickPadding(15)
+      .tickSize(10);
+    canvas.append("g")
+      .attr("class", "axis x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+    // mouseover data tack vare https://www.d3-graph-gallery.com/graph/line_cursor.html
+    var bisect = d3.bisector(function (d) { return d.intensity; }).left;
+    let focusGroup = canvas.append("g").attr("class", "focus");
+    let focusTextGroup = canvas.append("g").attr("class", "focusText");
+    let focus = {};
+    let focusText = {};
+    addFocusAndFocusTextGroups("red");
+    addFocusAndFocusTextGroups("green");
+    addFocusAndFocusTextGroups("blue");
+
+
+    function addFocusAndFocusTextGroups(color) {
+      focus[color] = focusGroup
+        .append('g')
+        .style("pointer-events", "none")
+        .append('circle')
+        .style("fill", color)
+        .attr("stroke", "black")
+        .attr('r', 7.5)
+        .style("opacity", 0);
+      focusText[color] = focusTextGroup
+        .append('g')
+        .append('text')
+        .style("opacity", 0)
+        .attr("text-anchor", "left")
+        .attr("alignment-baseline", "middle")
+    }
+
+    function mouseover() {
+      changeMouseOverOpacity("red", 1);
+      changeMouseOverOpacity("green", 1);
+      changeMouseOverOpacity("blue", 1);
+    }
+
+    function mousemove() {
+      // recover coordinate we need
+      const x0 = xScale.invert(d3.mouse(this)[0]);
+
+      updateMouseOverData("red", x0);
+      updateMouseOverData("green", x0);
+      updateMouseOverData("blue", x0);
+
+    }
+
+    function mouseout() {
+      changeMouseOverOpacity("red", 0);
+      changeMouseOverOpacity("green", 0);
+      changeMouseOverOpacity("blue", 0);
+    }
+
+    function updateMouseOverData(color, x0) {
+      const i = bisect(colorCounts[color], x0, 1);
+      const selectedData = colorCounts[color][i];
+      focus[color]
+        .attr("cx", xScale(selectedData.intensity))
+        .attr("cy", yScale(selectedData.count));
+
+      focusText[color]
+        .html("x: " + selectedData.intensity + " y: " + selectedData.count)
+        .attr("x", xScale(selectedData.intensity) + 15)
+        .attr("y", yScale(selectedData.count));
+    }
+
+    function changeMouseOverOpacity(color, opacity) {
+      focus[color].style("opacity", opacity);
+      focusText[color].style("opacity", opacity);
+    }
+
+  }
   // rita axises
   canvas.append("g")
     .attr("class", "axis y")
     .call(yAxis);
 
-  canvas.append("g")
-    .attr("class", "axis x")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis);
+
   // axis labels
   const labels = canvas.append("g").attr("class", "labels");
   labels.append("text")
@@ -252,76 +324,6 @@ const drawChart = () => {
     .attr("font-size", "20")
     .style("text-anchor", "middle")
     .text("Intensity");
-
-
-  // mouseover data tack vare https://www.d3-graph-gallery.com/graph/line_cursor.html
-  var bisect = d3.bisector(function (d) { return d.intensity; }).left;
-  let focusGroup = canvas.append("g").attr("class", "focus");
-  let focusTextGroup = canvas.append("g").attr("class", "focusText");
-  let focus = {};
-  let focusText = {};
-  addFocusAndFocusTextGroups("red");
-  addFocusAndFocusTextGroups("green");
-  addFocusAndFocusTextGroups("blue");
-
-
-  function addFocusAndFocusTextGroups(color) {
-    focus[color] = focusGroup
-      .append('g')
-      .style("pointer-events", "none")
-      .append('circle')
-      .style("fill", color)
-      .attr("stroke", "black")
-      .attr('r', 7.5)
-      .style("opacity", 0);
-    focusText[color] = focusTextGroup
-      .append('g')
-      .append('text')
-      .style("opacity", 0)
-      .attr("text-anchor", "left")
-      .attr("alignment-baseline", "middle")
-  }
-
-  function mouseover() {
-    changeMouseOverOpacity("red", 1);
-    changeMouseOverOpacity("green", 1);
-    changeMouseOverOpacity("blue", 1);
-  }
-
-  function mousemove() {
-    // recover coordinate we need
-    const x0 = xScale.invert(d3.mouse(this)[0]);
-
-    updateMouseOverData("red", x0);
-    updateMouseOverData("green", x0);
-    updateMouseOverData("blue", x0);
-
-  }
-
-  function mouseout() {
-    changeMouseOverOpacity("red", 0);
-    changeMouseOverOpacity("green", 0);
-    changeMouseOverOpacity("blue", 0);
-  }
-
-  function updateMouseOverData(color, x0) {
-    const i = bisect(colorCounts[color], x0, 1);
-    const selectedData = colorCounts[color][i];
-    focus[color]
-      .attr("cx", xScale(selectedData.intensity))
-      .attr("cy", yScale(selectedData.count));
-
-    focusText[color]
-      .html("x: " + selectedData.intensity + " y: " + selectedData.count)
-      .attr("x", xScale(selectedData.intensity) + 15)
-      .attr("y", yScale(selectedData.count));
-  }
-
-  function changeMouseOverOpacity(color, opacity) {
-    focus[color].style("opacity", opacity);
-    focusText[color].style("opacity", opacity);
-  }
-  
   // Gör sen en knapp som kan gömma bars
   makeButton();
   // Bilden har nu garanterat blivit ritad, så när resize händer får drawChart() kallas igen, och det finns data att rita om svg'n med
@@ -374,21 +376,20 @@ window.addEventListener("resize", (e) => {
 })
 
 // Button för att visa/gömma bars, men bara 1 gång
-function makeButton(){
-  if(!hasBeenDrawn){
-
-    const buttonLabel = [("Hide bars"),("Show Bars")];
+function makeButton() {
+  if (!hasBeenDrawn) {
+    const buttonLabel = [("Make area paths "),("Make bars")];
     const button = document.createElement("button");
-    button.innerHTML = buttonLabel[1];
-    
+    button.innerHTML = buttonLabel[Number(drawLineChart)];
+
     const content = document.getElementsByClassName("content");
     content[0].appendChild(button);
-    
-    button.addEventListener ("click", function() {
-      changeBarsOpacity();
-    });}
-  }
-function changeBarsOpacity(){
-  d3.selectAll(".Bars").attr("opacity",0).lower();
 
+    button.addEventListener("click", function () {
+      drawLineChart =! drawLineChart;
+      console.log("drawlinechart"+drawLineChart)
+      drawChart();
+      button.innerHTML = buttonLabel[Number(drawLineChart)];
+    });
+  }
 }
