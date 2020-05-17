@@ -25,9 +25,9 @@ const processData = (dataArray) => {
     b: {},
   }
   const barColorCounts = {
-    red: new Array(255),
-    blue: new Array(255),
-    green: new Array(255),
+    red: new Array(256),
+    blue: new Array(256),
+    green: new Array(256),
   }
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
@@ -66,7 +66,7 @@ const processData = (dataArray) => {
     barColorCounts.blue[key] = temporaryCounts.b[key];
   }
 
-  for (let i = 0; i < 255; i += barWidth) {
+  for (let i = 0; i < 256; i += barWidth) {
     barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + barWidth)));
     barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + barWidth)));
     barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + barWidth)));
