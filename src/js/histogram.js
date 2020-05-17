@@ -164,15 +164,11 @@ const drawChart = () => {
     .on('mouseover', mouseover)
     .on('mousemove', mousemove)
     .on('mouseout', mouseout);
-  // rita en linje
-  histogramGroup.append("path")
-    .attr("stroke", "red")
-    .attr("fill", "red")
-    .attr("d", area(colorCounts.red));
+
   // rektangel
   console.log("barrender", barRenderCounts);
-
-  canvas.append("g")
+  const barGroup = canvas.append("g").attr("class","Bars");
+  barGroup.append("g")
     .attr("class", "redgroup")
     .selectAll("röda")
     .data(barRenderCounts.red)
@@ -183,7 +179,7 @@ const drawChart = () => {
     .attr("x", (data, i) => { return xScale(i * barWidth) })
     .attr("height", (data) => { return yScaleBarchart(data) })
     .attr("y", (data) => { return height - yScaleBarchart(data) });
-  canvas.append("g")
+    barGroup.append("g")
     .attr("class", "greengroup")
     .selectAll("gröna")
     .data(barRenderCounts.green)
@@ -194,7 +190,7 @@ const drawChart = () => {
     .attr("x", (data, i) => { return xScale(i * barWidth) })
     .attr("height", (data) => { return yScaleBarchart(data) })
     .attr("y", (data) => { return height - yScaleBarchart(data) });
-  canvas.append("g")
+    barGroup.append("g")
     .attr("class", "bluegroup")
     .selectAll("blåa")
     .data(barRenderCounts.blue)
@@ -206,6 +202,11 @@ const drawChart = () => {
     .attr("height", (data) => { return yScaleBarchart(data) })
     .attr("y", (data) => { return height - yScaleBarchart(data) });
 
+    // Rita Areas
+  histogramGroup.append("path")
+    .attr("stroke", "red")
+    .attr("fill", "red")
+    .attr("d", area(colorCounts.red));
   histogramGroup.append("path")
     .attr("stroke", "green")
     .attr("fill", "green")
@@ -320,9 +321,12 @@ const drawChart = () => {
     focus[color].style("opacity", opacity);
     focusText[color].style("opacity", opacity);
   }
-
+  
+  // Gör sen en knapp som kan gömma bars
+  makeButton();
   // Bilden har nu garanterat blivit ritad, så när resize händer får drawChart() kallas igen, och det finns data att rita om svg'n med
   hasBeenDrawn = true;
+
 }
 
 const getImageData = (img) => {
@@ -343,7 +347,6 @@ const getImageData = (img) => {
 
   return dataArray;
 }
-
 const handleImage = (input) => {
   if (input.target.files && input.target.files[0]) {
     let img = new Image();
@@ -367,5 +370,25 @@ const handleImage = (input) => {
 document.querySelector("#input").addEventListener("change", handleImage);
 window.addEventListener("resize", (e) => {
   if (hasBeenDrawn) drawChart();
-  else console.log("false");
+  else console.log("No image detected for resize");
 })
+
+// Button för att visa/gömma bars, men bara 1 gång
+function makeButton(){
+  if(!hasBeenDrawn){
+
+    const buttonLabel = [("Hide bars"),("Show Bars")];
+    const button = document.createElement("button");
+    button.innerHTML = buttonLabel[1];
+    
+    const content = document.getElementsByClassName("content");
+    content[0].appendChild(button);
+    
+    button.addEventListener ("click", function() {
+      changeBarsOpacity();
+    });}
+  }
+function changeBarsOpacity(){
+  d3.selectAll(".Bars").attr("opacity",0).lower();
+
+}
