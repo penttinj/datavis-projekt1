@@ -25,6 +25,9 @@ Requires Node version 11.
 ## Preview
 ![Preview Image](/preview.gif)
 
+## Instructions
+You can change between Bars and Paths with the button at the bottom.
+The colors can be put on focus while in Path mode with a click (mouse).
 
 ## Contribution
 School project, probably won't be updated but constructive criticism is welcome.
