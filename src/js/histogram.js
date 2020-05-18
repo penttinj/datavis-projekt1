@@ -1,4 +1,5 @@
 // "Global state" av våran data.
+let rawData = [];
 let colorCounts = {
   red: [],
   green: [],
@@ -11,7 +12,7 @@ let barRenderCounts = {
 }
 
 // Används för att processera data och rita bars
-const barWidth = 5;
+let binSize = 5;
 
 // För resize eventlistner
 let hasBeenDrawn = false;
@@ -66,10 +67,10 @@ const processData = (dataArray) => {
     barColorCounts.blue[key] = temporaryCounts.b[key];
   }
 
-  for (let i = 0; i < 256; i += barWidth) {
-    barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + barWidth)));
-    barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + barWidth)));
-    barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + barWidth)));
+  for (let i = 0; i < 256; i += binSize) {
+    barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + binSize)));
+    barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + binSize)));
+    barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + binSize)));
   }
 }
 
@@ -182,7 +183,7 @@ const drawChart = () => {
       .call(xAxis);
 
     // mouseover data tack vare https://www.d3-graph-gallery.com/graph/line_cursor.html
-    var bisect = d3.bisector(function (d) { return d.intensity; }).left;
+    const bisect = d3.bisector(function (d) { return d.intensity; }).left;
     let focusGroup = canvas.append("g").attr("class", "focus");
     let focusTextGroup = canvas.append("g").attr("class", "focusText");
     let focus = {};
@@ -254,8 +255,8 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "red")
-      .attr("width", xScale(barWidth))
-      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("width", xScale(binSize))
+      .attr("x", (data, i) => { return xScale(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
     barGroup.append("g")
@@ -265,8 +266,8 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "green")
-      .attr("width", xScale(barWidth))
-      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("width", xScale(binSize))
+      .attr("x", (data, i) => { return xScale(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
     barGroup.append("g")
@@ -276,13 +277,13 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "blue")
-      .attr("width", xScale(barWidth))
-      .attr("x", (data, i) => { return xScale(i * barWidth) })
+      .attr("width", xScale(binSize))
+      .attr("x", (data, i) => { return xScale(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
 
     // Gör xAxeln för rekt
-    const xAxis = d3.axisBottom(xScale).ticks(255 / barWidth).tickFormat(function (d, i) { return i % 2 ? null : d; });
+    const xAxis = d3.axisBottom(xScale).ticks(255 / binSize).tickFormat(function (d, i) { return i % 2 ? null : d; });
     canvas.append("g")
       .attr("class", "axis x")
       .attr("transform", "translate(0," + height + ")")
@@ -317,6 +318,9 @@ const drawChart = () => {
   // Knappen som ändrar mellan paths eller bars
   makeButton();
 
+  // Visa binSize selectorn
+  document.querySelector("#binSizeDiv").style.display = drawLineChart ? "none" : "block";
+
   // Bilden har nu garanterat blivit ritad, så när resize händer får drawChart() kallas igen, och det finns data att rita om svg'n med
   hasBeenDrawn = true;
 }
@@ -342,14 +346,13 @@ const getImageData = (img) => {
 const handleImage = (input) => {
   if (input.target.files && input.target.files[0]) {
     let img = new Image();
-    let data = [];
     const reader = new FileReader();
     reader.onload = (e) => {
       img.src = e.target.result;
       // Waits until the img element has completely loaded so we can access its properties
       img.onload = () => {
-        data = getImageData(img);
-        processData(data);
+        rawData = getImageData(img);
+        processData(rawData);
         drawChart();
       }
     }
@@ -358,12 +361,18 @@ const handleImage = (input) => {
   }
 }
 
-// Resize funktion från lektioner
+// Triggas då en bild väljs
 document.querySelector("#input").addEventListener("change", handleImage);
+// Ritar om chart på resize
 window.addEventListener("resize", (e) => {
   if (hasBeenDrawn) drawChart();
-  else console.log("No image detected for resize");
-})
+});
+// Ritar om chart med ny bar bredd
+document.querySelector("#binSizeSelect").addEventListener("change", (e) => {
+  binSize = parseInt(e.target.value, 10);
+  processData(rawData);
+  drawChart();
+});
 
 // Knappen fsom byter mellan bars och paths
 function makeButton() {
