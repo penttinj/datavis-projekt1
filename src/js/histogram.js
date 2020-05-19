@@ -12,7 +12,7 @@ let barRenderCounts = {
 }
 
 // Används för att processera data och rita bars
-let binSize = 5;
+let binSize = 15;
 
 // För resize eventlistner
 let hasBeenDrawn = false;
@@ -26,9 +26,9 @@ const processData = (dataArray) => {
     b: {},
   }
   const barColorCounts = {
-    red: new Array(256),
-    blue: new Array(256),
-    green: new Array(256),
+    red: new Uint16Array(256),
+    blue: new Uint16Array(256),
+    green: new Uint16Array(256),
   }
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
@@ -67,10 +67,11 @@ const processData = (dataArray) => {
     barColorCounts.blue[key] = temporaryCounts.b[key];
   }
 
-  for (let i = 0; i < 256; i += binSize) {
-    barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + binSize)));
-    barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + binSize)));
-    barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + binSize)));
+  for (let i = 0; i < 255; i += binSize) {
+    const stupid = (i + binSize == 255) ? 1 : 0; // Om vi är i sista loopen, läggs ännu 255:e färgen till sista balken
+    barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + binSize + stupid)));
+    barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + binSize + stupid)));
+    barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + binSize + stupid)));
   }
 }
 
@@ -282,8 +283,18 @@ const drawChart = () => {
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
 
-    // Gör xAxeln för rekt
-    const xAxis = d3.axisBottom(xScale).ticks(255 / binSize).tickFormat(function (d, i) { return i % 2 ? null : d; });
+    // Gör xAxeln för barchart
+    const barCount = barRenderCounts.blue.length;
+    const tickVals = [];
+    for (let i = 0; i < barCount; i++) {
+      tickVals.push(binSize * i + binSize / 2); // De här blir positionen var ticken hamnar. (binSize/2) skjuter ticken till mitten av bar
+    };
+
+    const xAxis = d3.axisBottom(xScale).tickSize(10).tickValues(tickVals).tickFormat((d, i) => {
+      const stupid = (binSize * (i + 1) === 255) ? 1 : 0; // Värde som läggs till om vi e på sista ticken så de blir 255 istället för 254
+      return `${binSize * i} - ${binSize * (i + 1) - 1 + stupid}`
+    });
+
     canvas.append("g")
       .attr("class", "axis x")
       .attr("transform", "translate(0," + height + ")")
