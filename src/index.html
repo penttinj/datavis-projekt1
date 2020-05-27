@@ -19,19 +19,18 @@
       image.
     </p>
     <input type="file" id="input" />
-    <div id="binSizeDiv">
-      Choose bar size:
-      <select name="binSizes" id="binSizeSelect">
-    <option value="1">1</option>
-    <option value="3">3</option>
-    <option value="5" selected>5</option>
-    <option value="15">15</option>
-    <option value="17">17</option>
-    <option value="51">51</option>
-    <option value="85">85</option>
-    </select>
-  </div>
     <div id="lines"></div>
+  </div>
+  <div id="binSizeDiv">
+    <span class="white">Choose bar size:</span>
+    <select name="binSizes" id="binSizeSelect">
+      <option value="2">2</option>
+      <option value="4">4</option>
+      <option value="8">8</option>
+      <option value="16" selected>16</option>
+      <option value="32">32</option>
+      <option value="64">64</option>
+    </select>
   </div>
   <canvas hidden=true id="canvas">Din webbläsare stöder inte canvas!</canvas>
 </body>

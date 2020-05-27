@@ -12,7 +12,7 @@ let barRenderCounts = {
 }
 
 // Används för att processera data och rita bars
-let binSize = 5;
+let binSize = 16;
 
 // För resize eventlistner
 let hasBeenDrawn = false;
@@ -26,9 +26,9 @@ const processData = (dataArray) => {
     b: {},
   }
   const barColorCounts = {
-    red: new Array(256),
-    blue: new Array(256),
-    green: new Array(256),
+    red: new Uint16Array(256),
+    blue: new Uint16Array(256),
+    green: new Uint16Array(256),
   }
   // Räknar occurences av varje color värde
   for (let i = 0; i < dataArray.length; i += 4) {
@@ -67,11 +67,12 @@ const processData = (dataArray) => {
     barColorCounts.blue[key] = temporaryCounts.b[key];
   }
 
-  for (let i = 0; i < 256; i += binSize) {
+  for (let i = 0; i < 255; i += binSize) {
     barRenderCounts.red.push(d3.sum(barColorCounts.red.slice(i, i + binSize)));
     barRenderCounts.green.push(d3.sum(barColorCounts.green.slice(i, i + binSize)));
     barRenderCounts.blue.push(d3.sum(barColorCounts.blue.slice(i, i + binSize)));
   }
+  console.log("barcolorcounts: ", barColorCounts);
 }
 
 
@@ -103,6 +104,9 @@ const drawChart = () => {
   const yScaleBarchart = d3.scaleLinear()
     .domain([0, maxIntensity])
     .range([0, height]);
+  const xScaleBarchart = d3.scaleLinear()
+    .domain([0, 256])
+    .range([0, width]);
   const yScale = d3.scaleLinear()
     .domain([0, maxIntensity])
     .range([height, 0]);
@@ -246,7 +250,7 @@ const drawChart = () => {
   }
   else {
     // Rita bars
-    console.log("barrender", barRenderCounts);
+    console.log("barrendercounts: ", barRenderCounts);
     const barGroup = canvas.append("g").attr("class", "Bars");
     barGroup.append("g")
       .attr("class", "redgroup")
@@ -255,8 +259,8 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "red")
-      .attr("width", xScale(binSize))
-      .attr("x", (data, i) => { return xScale(i * binSize) })
+      .attr("width", xScaleBarchart(binSize))
+      .attr("x", (data, i) => { return xScaleBarchart(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
     barGroup.append("g")
@@ -266,8 +270,8 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "green")
-      .attr("width", xScale(binSize))
-      .attr("x", (data, i) => { return xScale(i * binSize) })
+      .attr("width", xScaleBarchart(binSize))
+      .attr("x", (data, i) => { return xScaleBarchart(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
     barGroup.append("g")
@@ -277,13 +281,22 @@ const drawChart = () => {
       .enter()
       .append("rect")
       .attr("fill", "blue")
-      .attr("width", xScale(binSize))
-      .attr("x", (data, i) => { return xScale(i * binSize) })
+      .attr("width", xScaleBarchart(binSize))
+      .attr("x", (data, i) => { return xScaleBarchart(i * binSize) })
       .attr("height", (data) => { return yScaleBarchart(data) })
       .attr("y", (data) => { return height - yScaleBarchart(data) });
 
-    // Gör xAxeln för rekt
-    const xAxis = d3.axisBottom(xScale).ticks(255 / binSize).tickFormat(function (d, i) { return i % 2 ? null : d; });
+    // Gör xAxeln för barchart
+    const barCount = barRenderCounts.blue.length;
+    const tickVals = [];
+    for (let i = 0; i < barCount; i++) {
+      tickVals.push(binSize * i + binSize / 2); // De här blir positionen var ticken hamnar. (binSize/2) skjuter ticken till mitten av bar
+    };
+
+    const xAxis = d3.axisBottom(xScaleBarchart).tickSize(10).tickValues(tickVals).tickFormat((d, i) => {
+      return `${binSize * i} - ${binSize * (i + 1) - 1}`
+    });
+
     canvas.append("g")
       .attr("class", "axis x")
       .attr("transform", "translate(0," + height + ")")

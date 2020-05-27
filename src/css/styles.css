@@ -39,8 +39,13 @@ section {
     text-align: center;
 }
 
+.white{
+    color: white;
+    font-size: large;
+}
 
-button {
+
+button, select {
     text-align: center;
     width: 160px;
     height: 40px;
@@ -106,4 +111,8 @@ button:after {
     100% {
         background-position: 0 0;
     }
+}
+#binSizeDiv {
+    display: none;
+    text-align: center;
 }
